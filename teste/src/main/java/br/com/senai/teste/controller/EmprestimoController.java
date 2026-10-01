@@ -93,6 +93,17 @@ public class EmprestimoController {
         
         return ResponseEntity.ok(emprestimos);
     }
+
+    @GetMapping ("/livro/{livroId}")
+    public ResponseEntity<List<Emprestimo>> listarPorLivro(
+            @PathVariable Integer livroId) {
+
+        List<Emprestimo> emprestimos = emprestimoService.listarPorLivro(livroId);
+        
+        return ResponseEntity.ok(emprestimos);
+    }
+
+    
     
     
 }

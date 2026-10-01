@@ -14,6 +14,8 @@ public interface EmprestimoRepository
 
     List<Emprestimo> findByDataDevolucaoIsNull();
     List<Emprestimo> findByAlunoId(Integer alunoId);
+    List<Emprestimo> findByLivroId(Integer livroId);
+   
     
         
 

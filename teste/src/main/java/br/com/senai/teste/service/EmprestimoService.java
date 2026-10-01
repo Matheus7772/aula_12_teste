@@ -94,4 +94,8 @@ public class EmprestimoService {
         return emprestimoRepository.findByAlunoId(alunoId);
     }
     
+    public List<Emprestimo> listarPorLivro(Integer livroId){
+        return emprestimoRepository.findByLivroId(livroId);
+    }
+
 }
