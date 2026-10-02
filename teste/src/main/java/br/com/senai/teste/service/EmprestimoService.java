@@ -34,7 +34,7 @@ public class EmprestimoService {
     }
 
     public Optional<Emprestimo> cadastrar(
-            Integer alunoId, Integer livroId) {
+            Integer alunoId, Integer livroId, LocalDate dataPrevistaDevolucao) {
 
         Optional<Aluno> aluno = alunoRepository.findById(alunoId);
         Optional<Livros> livro = livroRepository.findById(livroId);
@@ -55,6 +55,8 @@ public class EmprestimoService {
         emprestimo.setAluno(aluno.get());
         emprestimo.setLivro(livro.get());
         emprestimo.setDataEmprestimo(LocalDate.now());
+        emprestimo.setDataPrevistaDevolucao(
+            dataPrevistaDevolucao);
 
         return Optional.of(emprestimoRepository.save(emprestimo));
     }
@@ -98,4 +100,53 @@ public class EmprestimoService {
         return emprestimoRepository.findByLivroId(livroId);
     }
 
+    public List<Emprestimo> listarAtrasados(){
+        return emprestimoRepository
+                .findByDataPrevistaDevolucaoBeforeAndDataDevolucaoIsNull(
+                        LocalDate.now());
+    }
+    public List<Emprestimo> listarAlunosAtrasados(Integer alunoId){
+        return emprestimoRepository
+                .findByAlunoIdAndDataPrevistaDevolucaoBeforeAndDataDevolucaoIsNull(
+                        alunoId, LocalDate.now());
+    }
+
+    public Optional<Emprestimo> renovar(
+        Integer id, LocalDate novaDataPrevistaDevolucao) {
+        
+       Optional<Emprestimo> emprestimOptional = emprestimoRepository.findById(id);
+
+        if (emprestimOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Emprestimo emprestimo = emprestimOptional.get();
+
+        if (emprestimo.getDataDevolucao() != null) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "O empréstimo já foi devolvido e não pode ser renovado."
+            );
+        }
+        if (emprestimo.getDataDevolucao() != null) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "O empréstimo já foi devolvido e não pode ser renovado."
+            );
+            
+        }
+        if (!novaDataPrevistaDevolucao.isAfter(emprestimo.getDataPrevistaDevolucao())) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "A nova data prevista de devolução deve ser posterior à data prevista de devolução atual."
+            );
+            
+        }
+
+        emprestimo.setDataPrevistaDevolucao(novaDataPrevistaDevolucao);
+       
+
+        return Optional.of( emprestimoRepository.save(emprestimo));
+    
+    }
 }
